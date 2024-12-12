@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kanban Board</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="kanban-container">
+        <div class="app-header">
+            <div class="toolbar">
+                <button id="addListBtn" class="btn primary">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M12 5v14M5 12h14" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                    New List
+                </button>
+                <button id="addCategoryBtn" class="btn secondary">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M4 9h16M4 15h16M8 5v14M16 5v14" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                    New Category
+                </button>
+            </div>
+            <div class="filter-section">
+                <div class="filter-header">
+                    <h3>Filter by Categories</h3>
+                    <button id="clearFilters" class="btn text">Clear Filters</button>
+                </div>
+                <div id="categoryFilters" class="category-filters"></div>
+            </div>
+        </div>
+        
+        <div id="kanbanBoard" class="kanban-board">
+            <!-- Default Lists -->
+            <div class="list" data-list-id="todo">
+                <div class="list-header">
+                    <h2>To Do</h2>
+                    <button class="add-task-btn">+</button>
+                </div>
+                <div class="list-content" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+            </div>
+            
+            <div class="list" data-list-id="doing">
+                <div class="list-header">
+                    <h2>Doing</h2>
+                    <button class="add-task-btn">+</button>
+                </div>
+                <div class="list-content" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+            </div>
+            
+            <div class="list" data-list-id="done">
+                <div class="list-header">
+                    <h2>Done</h2>
+                    <button class="add-task-btn">+</button>
+                </div>
+                <div class="list-content" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+            </div>
+            <div class="list" data-list-id="${listId}">
+                <div class="list-header">
+                    <div class="list-title">
+                        <h2 contenteditable="true">New List</h2>
+                        <div class="list-actions">
+                            <button class="btn icon delete-list-btn">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <button class="btn icon add-task-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M12 5v14M5 12h14" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="list-content" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Templates -->
+    <template id="taskTemplate">
+        <div class="task" draggable="true">
+            <div class="task-header">
+                <span class="task-title"></span>
+                <div class="task-actions">
+                    <button class="edit-task-btn">Edit</button>
+                    <button class="delete-task-btn">×</button>
+                </div>
+            </div>
+            <div class="task-categories"></div>
+        </div>
+    </template>
+
+    <template id="categoryTemplate">
+        <div class="category">
+            <span class="category-name"></span>
+            <button class="add-subcategory-btn">+</button>
+            <div class="subcategories"></div>
+        </div>
+    </template>
+
+    <!-- Modals -->
+    <div id="taskModal" class="modal">
+        <div class="modal-content">
+            <h3>Task Details</h3>
+            <input type="text" id="taskTitle" placeholder="Task Title">
+            <div id="categorySelector"></div>
+            <div class="modal-buttons">
+                <button id="saveTaskBtn">Save</button>
+                <button id="cancelTaskBtn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="categoryModal" class="modal">
+        <div class="modal-content">
+            <h3>New Category</h3>
+            <input type="text" id="categoryName" placeholder="Category Name">
+            <input type="color" id="categoryColor">
+            <select id="parentCategory">
+                <option value="">Root Level</option>
+            </select>
+            <div class="modal-buttons">
+                <button id="saveCategoryBtn">Save</button>
+                <button id="cancelCategoryBtn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

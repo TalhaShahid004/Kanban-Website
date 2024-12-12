@@ -1,0 +1,207 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background: #f5f6fa;
+    color: #2d3436;
+    line-height: 1.6;
+}
+
+.kanban-container {
+    padding: 20px;
+    height: 100vh;
+}
+
+.toolbar {
+    margin-bottom: 20px;
+}
+
+.add-btn {
+    padding: 8px 16px;
+    background: #6c5ce7;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.add-btn:hover {
+    background: #5849c4;
+}
+
+.kanban-board {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    padding-bottom: 20px;
+}
+
+.list {
+    min-width: 300px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.list-header {
+    padding: 16px;
+    background: #f8f9fa;
+    border-radius: 8px 8px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.list-header h2 {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.list-content {
+    padding: 16px;
+    min-height: 100px;
+}
+
+.task {
+    background: white;
+    border: 1px solid #e1e1e1;
+    border-radius: 4px;
+    padding: 12px;
+    margin-bottom: 8px;
+    cursor: grab;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.task:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.task.dragging {
+    opacity: 0.5;
+    transform: scale(1.02);
+}
+
+.task-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+}
+
+.task-title {
+    font-weight: 500;
+}
+
+.task-actions {
+    display: flex;
+    gap: 4px;
+}
+
+.task-actions button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity 0.2s ease;
+}
+
+.task-actions button:hover {
+    opacity: 1;
+}
+
+.task-categories {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.category {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.category .subcategories {
+    margin-left: 16px;
+}
+
+.add-task-btn, .add-subcategory-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2rem;
+    color: #6c5ce7;
+    transition: transform 0.2s ease;
+}
+
+.add-task-btn:hover, .add-subcategory-btn:hover {
+    transform: scale(1.1);
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+}
+
+.modal.active {
+    display: flex;
+}
+
+.modal-content {
+    background: white;
+    padding: 24px;
+    border-radius: 8px;
+    min-width: 300px;
+}
+
+.modal-content input[type="text"] {
+    width: 100%;
+    padding: 8px;
+    margin: 8px 0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.modal-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+.modal-buttons button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#saveTaskBtn, #saveCategoryBtn {
+    background: #6c5ce7;
+    color: white;
+}
+
+#cancelTaskBtn, #cancelCategoryBtn {
+    background: #e1e1e1;
+}
+
+/* Drag and Drop Styles */
+.list-content.drag-over {
+    background: rgba(108, 92, 231, 0.1);
+}
