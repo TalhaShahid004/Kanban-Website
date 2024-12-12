@@ -262,10 +262,22 @@ body {
     padding: 8px 12px;
     border-radius: 6px;
     transition: background 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .category-option:hover {
     background: var(--bg-tertiary);
+}
+
+.category-option input[type="checkbox"] {
+    margin: 0;
+}
+
+.category-option label {
+    margin: 0;
+    cursor: pointer;
 }
 
 .list-content.drag-over {
@@ -296,7 +308,15 @@ body {
     padding: 6px 8px;
     background: var(--bg-tertiary);
     border-radius: 6px;
-    margin-bottom: 2px;
+    margin-bottom: 2px;.category-option {
+    padding: 8px 12px;
+    border-radius: 6px;
+    transition: background 0.2s ease;
+}
+
+.category-option:hover {
+    background: var(--bg-tertiary);
+}
 }
 
 .category-children {

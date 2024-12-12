@@ -35,10 +35,7 @@ function setupEventListeners() {
     document.getElementById('clearFiltersBtn')?.addEventListener('click', clearFilters);
     document.getElementById('closeFiltersBtn')?.addEventListener('click', closeFilterModal);
 
-    // Add task buttons
-    document.querySelectorAll('.add-task-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => showTaskModal(e.target.closest('.list').dataset.listId));
-    });
+  
 }
 document.querySelectorAll('.add-task-btn').forEach(btn => {
     btn.addEventListener('click', (e) => showTaskModal(e.target.closest('.list').dataset.listId));
@@ -365,23 +362,55 @@ function renderFilterTree() {
     const filterTree = document.getElementById('filterTree');
     filterTree.innerHTML = '';
 
-    function buildFilterNode(category) {
+    function buildFilterNode(category, level = 0) {
         const node = document.createElement('div');
-        node.className = 'category-tree-item';
-        node.style.paddingLeft = `${category.level * 20}px`;
+        node.className = 'category-option';
+        node.style.paddingLeft = `${level * 20}px`;
 
         const checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
-        checkbox.checked = state.activeFilters.has(category.id);
+        checkbox.id = `filter-cat-${category.id}`;
         checkbox.className = 'category-filter-checkbox';
         checkbox.dataset.categoryId = category.id;
 
         const label = document.createElement('label');
+        label.htmlFor = `filter-cat-${category.id}`;
         label.textContent = category.name;
         label.style.color = category.color;
 
         node.appendChild(checkbox);
         node.appendChild(label);
+
+        // Add checkbox change handler
+        checkbox.addEventListener('change', (e) => {
+            if (e.target.checked) {
+                // When selecting a category, uncheck all its ancestor categories
+                let parent = category;
+                while (parent.parentId) {
+                    parent = findCategory(parent.parentId);
+                    if (parent) {
+                        const parentCheckbox = document.querySelector(`.category-filter-checkbox[data-category-id="${parent.id}"]`);
+                        if (parentCheckbox) parentCheckbox.checked = false;
+                    }
+                }
+            }
+            // When unchecking, also uncheck all descendant categories
+            if (!e.target.checked) {
+                const uncheckChildren = (cat) => {
+                    if (cat.children) {
+                        cat.children.forEach(childId => {
+                            const child = findCategory(childId);
+                            if (child) {
+                                const childCheckbox = document.querySelector(`.category-filter-checkbox[data-category-id="${child.id}"]`);
+                                if (childCheckbox) childCheckbox.checked = false;
+                                uncheckChildren(child);
+                            }
+                        });
+                    }
+                };
+                uncheckChildren(category);
+            }
+        });
 
         if (category.children && category.children.length > 0) {
             const childContainer = document.createElement('div');
@@ -389,7 +418,7 @@ function renderFilterTree() {
             category.children.forEach(childId => {
                 const child = findCategory(childId);
                 if (child) {
-                    childContainer.appendChild(buildFilterNode(child));
+                    childContainer.appendChild(buildFilterNode(child, level + 1));
                 }
             });
             node.appendChild(childContainer);
@@ -405,6 +434,9 @@ function renderFilterTree() {
 }
 
 function applyFilters() {
+    if (!(state.activeFilters instanceof Set)) {
+        state.activeFilters = new Set();
+    }
     state.activeFilters.clear();
     document.querySelectorAll('.category-filter-checkbox:checked').forEach(checkbox => {
         state.activeFilters.add(parseInt(checkbox.dataset.categoryId));
@@ -412,32 +444,23 @@ function applyFilters() {
     filterTasks();
     closeFilterModal();
 }
-
 function clearFilters() {
+    if (!(state.activeFilters instanceof Set)) {
+        state.activeFilters = new Set();
+    }
     state.activeFilters.clear();
     document.querySelectorAll('.category-filter-checkbox').forEach(checkbox => {
         checkbox.checked = false;
     });
     filterTasks();
+    closeFilterModal();
 }
 
 function closeFilterModal() {
     document.getElementById('filterModal').classList.remove('active');
 }
 
-function filterTasks() {
-    document.querySelectorAll('.task').forEach(taskEl => {
-        const taskId = parseInt(taskEl.dataset.taskId);
-        const task = state.tasks.find(t => t.id === taskId);
 
-        if (state.activeFilters.size === 0 ||
-            task.categories.some(catId => state.activeFilters.has(catId))) {
-            taskEl.style.display = '';
-        } else {
-            taskEl.style.display = 'none';
-        }
-    });
-}
 
 
 function renderTask(task) {
@@ -501,13 +524,20 @@ function editTask(taskId) {
         showTaskModal(task.listId, taskId);
     }
 }
-
 function deleteTask(taskId) {
-    const index = state.tasks.findIndex(t => t.id === taskId);
-    if (index !== -1) {
-        state.tasks.splice(index, 1);
-        document.querySelector(`[data-task-id="${taskId}"]`).remove();
-        saveToLocalStorage();
+    const task = state.tasks.find(t => t.id === taskId);
+    if (!task) return;
+    
+    // Show confirmation dialog with task title
+    const confirmDelete = confirm(`Are you sure you want to delete the task "${task.title}"? This action cannot be undone.`);
+    
+    if (confirmDelete) {
+        const index = state.tasks.findIndex(t => t.id === taskId);
+        if (index !== -1) {
+            state.tasks.splice(index, 1);
+            document.querySelector(`[data-task-id="${taskId}"]`).remove();
+            saveToLocalStorage();
+        }
     }
 }
 
@@ -713,19 +743,33 @@ function updateCategoryFilters() {
 }
 
 function filterTasks() {
-    const selectedFilters = Array.from(document.querySelectorAll('.category-filter input:checked'))
-        .map(cb => parseInt(cb.id.replace('filter-', '')));
+    const activeFilters = new Set(Array.from(document.querySelectorAll('.category-filter-checkbox:checked'))
+        .map(cb => parseInt(cb.dataset.categoryId)));
 
     document.querySelectorAll('.task').forEach(taskEl => {
         const taskId = parseInt(taskEl.dataset.taskId);
         const task = state.tasks.find(t => t.id === taskId);
+        
+        if (!task) return;
 
-        if (selectedFilters.length === 0 ||
-            selectedFilters.some(filterId => task.categories.includes(filterId))) {
-            taskEl.style.display = '';
-        } else {
-            taskEl.style.display = 'none';
+        let shouldShow = activeFilters.size === 0;
+        
+        if (!shouldShow && task.categories) {
+            // Show task if it has any of the selected categories or their children
+            shouldShow = task.categories.some(catId => {
+                // Check if category or any of its ancestors is in active filters
+                let currentCat = findCategory(catId);
+                while (currentCat) {
+                    if (activeFilters.has(currentCat.id)) {
+                        return true;
+                    }
+                    currentCat = currentCat.parentId ? findCategory(currentCat.parentId) : null;
+                }
+                return false;
+            });
         }
+        
+        taskEl.style.display = shouldShow ? '' : 'none';
     });
 }
 
@@ -873,34 +917,48 @@ function addNewListButton() {
 
 // Storage Functions
 function saveToLocalStorage() {
-    localStorage.setItem('kanbanState', JSON.stringify(state));
+    const stateToSave = {
+        ...state,
+        activeFilters: Array.from(state.activeFilters)
+    };
+    localStorage.setItem('kanbanState', JSON.stringify(stateToSave));
 }
+
 function loadFromLocalStorage() {
     const savedState = localStorage.getItem('kanbanState');
     if (savedState) {
         const parsedState = JSON.parse(savedState);
-
+        
+        // Initialize default values if they don't exist
+        parsedState.categories = parsedState.categories || [];
+        parsedState.tasks = parsedState.tasks || [];
+        parsedState.lists = parsedState.lists || [];
+        parsedState.nextTaskId = parsedState.nextTaskId || 1;
+        parsedState.nextCategoryId = parsedState.nextCategoryId || 1;
+        
         // Ensure all categories have a children array
-        if (parsedState.categories) {
-            parsedState.categories.forEach(cat => {
-                if (!cat.children) {
-                    cat.children = [];
-                }
-            });
-        }
-
+        parsedState.categories.forEach(cat => {
+            if (!cat.children) {
+                cat.children = [];
+            }
+        });
+        
+        // Handle activeFilters
+       // Handle activeFilters conversion
+parsedState.activeFilters = new Set(parsedState.activeFilters ? 
+    (Array.isArray(parsedState.activeFilters) ? parsedState.activeFilters : []) : []);
+        
+        // Update state
         Object.assign(state, parsedState);
-
-        // Clear existing lists
+        
+        // Clear existing board
         kanbanBoard.innerHTML = '';
 
-        // Render lists
+        // Render lists and tasks
         state.lists.forEach(list => renderList(list));
-
-        // Render existing tasks
         state.tasks.forEach(task => renderTask(task));
 
-        // Update category selector and filters
+        // Update UI components
         updateCategorySelector();
         updateCategoryFilters();
     }
@@ -1088,8 +1146,17 @@ function initializeBoard() {
 
 
 // Add clear filters button handler
-document.getElementById('clearFilters').addEventListener('click', () => {
-    document.querySelectorAll('.category-filter input').forEach(cb => cb.checked = false);
+document.getElementById('clearFilters')?.addEventListener('click', () => {
+    document.querySelectorAll('.category-filter-checkbox').forEach(cb => {
+        cb.checked = false;
+    });
+    filterTasks();
+});
+
+document.getElementById('clearFiltersBtn')?.addEventListener('click', () => {
+    document.querySelectorAll('.category-filter-checkbox').forEach(cb => {
+        cb.checked = false;
+    });
     filterTasks();
 });
 
