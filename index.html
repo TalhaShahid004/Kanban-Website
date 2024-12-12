@@ -1,26 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kanban Board</title>
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
     <div class="kanban-container">
         <div class="app-header">
+
             <div class="toolbar">
-                <button id="addListBtn" class="btn primary">
+                <button id="categoryManagerBtn" class="btn secondary">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <path d="M12 5v14M5 12h14" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M4 9h16M4 15h16M8 5v14M16 5v14" stroke-width="2" stroke-linecap="round" />
                     </svg>
-                    New List
+                    Categories
                 </button>
-                <button id="addCategoryBtn" class="btn secondary">
+                <button id="filterBtn" class="btn secondary">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <path d="M4 9h16M4 15h16M8 5v14M16 5v14" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M3 6h18M6 12h12M9 18h6" stroke-width="2" stroke-linecap="round" />
                     </svg>
-                    New Category
+                    Filters
                 </button>
             </div>
             <div class="filter-section">
@@ -31,7 +34,7 @@
                 <div id="categoryFilters" class="category-filters"></div>
             </div>
         </div>
-        
+
         <div id="kanbanBoard" class="kanban-board">
             <!-- Default Lists -->
             <div class="list" data-list-id="todo">
@@ -41,7 +44,7 @@
                 </div>
                 <div class="list-content" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
             </div>
-            
+
             <div class="list" data-list-id="doing">
                 <div class="list-header">
                     <h2>Doing</h2>
@@ -49,31 +52,11 @@
                 </div>
                 <div class="list-content" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
             </div>
-            
+
             <div class="list" data-list-id="done">
                 <div class="list-header">
                     <h2>Done</h2>
                     <button class="add-task-btn">+</button>
-                </div>
-                <div class="list-content" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
-            </div>
-            <div class="list" data-list-id="${listId}">
-                <div class="list-header">
-                    <div class="list-title">
-                        <h2 contenteditable="true">New List</h2>
-                        <div class="list-actions">
-                            <button class="btn icon delete-list-btn">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                    <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                    <button class="btn icon add-task-btn">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                            <path d="M12 5v14M5 12h14" stroke-width="2" stroke-linecap="round"/>
-                        </svg>
-                    </button>
                 </div>
                 <div class="list-content" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
             </div>
@@ -105,31 +88,62 @@
     <!-- Modals -->
     <div id="taskModal" class="modal">
         <div class="modal-content">
-            <h3>Task Details</h3>
-            <input type="text" id="taskTitle" placeholder="Task Title">
-            <div id="categorySelector"></div>
+            <h3>New Task</h3>
+            <div class="task-form">
+                <div class="form-group">
+                    <label for="taskTitle">Title</label>
+                    <input type="text" id="taskTitle" placeholder="Task Title">
+                </div>
+                <div class="form-group">
+                    <label for="taskDescription">Description</label>
+                    <textarea id="taskDescription" placeholder="Task Description"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Categories</label>
+                    <div id="categorySelector" class="category-tree"></div>
+                </div>
+            </div>
             <div class="modal-buttons">
-                <button id="saveTaskBtn">Save</button>
-                <button id="cancelTaskBtn">Cancel</button>
+                <button id="saveTaskBtn" class="btn primary">Save</button>
+                <button id="cancelTaskBtn" class="btn secondary">Cancel</button>
             </div>
         </div>
     </div>
 
     <div id="categoryModal" class="modal">
         <div class="modal-content">
-            <h3>New Category</h3>
-            <input type="text" id="categoryName" placeholder="Category Name">
-            <input type="color" id="categoryColor">
-            <select id="parentCategory">
-                <option value="">Root Level</option>
-            </select>
+            <h3>Category Management</h3>
+            <div class="category-manager">
+                <div class="category-tree" id="categoryTree"></div>
+                <button id="addRootCategoryBtn" class="btn secondary">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M12 5v14M5 12h14" stroke-width="2" stroke-linecap="round" />
+                    </svg>
+                    Add Root Category
+                </button>
+            </div>
+            <div id="categoryForm" class="category-form" style="display: none;">
+                <input type="text" id="categoryName" placeholder="Category Name">
+                <input type="color" id="categoryColor">
+                <button id="saveCategoryBtn" class="btn primary">Save</button>
+                <button id="cancelCategoryBtn" class="btn secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="filterModal" class="modal">
+        <div class="modal-content">
+            <h3>Filter Tasks</h3>
+            <div id="filterTree" class="category-tree"></div>
             <div class="modal-buttons">
-                <button id="saveCategoryBtn">Save</button>
-                <button id="cancelCategoryBtn">Cancel</button>
+                <button id="applyFiltersBtn" class="btn primary">Apply</button>
+                <button id="clearFiltersBtn" class="btn secondary">Clear All</button>
+                <button id="closeFiltersBtn" class="btn secondary">Close</button>
             </div>
         </div>
     </div>
 
     <script src="script.js"></script>
 </body>
+
 </html>
