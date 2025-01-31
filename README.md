@@ -20,14 +20,6 @@ This repository contains a simple Kanban board web application built using HTML,
 *   **Modals:** Utilizes modals for task creation/editing, category management, and filtering tasks.
 <br/>
 
-## 📜 Table of Contents
-* [Installation](#installation)
-* [Usage](#usage)
-* [Dependencies](#dependencies)
-* [Contributing](#contributing)
-* [License](#license)
-* [Contact](#contact)
-
 <br/>
 
 ## 🛠️ Installation
