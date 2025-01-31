@@ -1,10 +1,6 @@
 
 <div align="center">
   <h1>Kanban Website</h1>
-  <a href="https://github.com/TalhaShahid004/Kanban-Website/actions/workflows/main.yml"><img src="https://github.com/TalhaShahid004/Kanban-Website/actions/workflows/main.yml/badge.svg" alt="Build Status"></a>
-  <a href="https://github.com/TalhaShahid004/Kanban-Website/issues"><img src="https://img.shields.io/github/issues/TalhaShahid004/Kanban-Website" alt="Issues"></a>
-  <a href="https://github.com/TalhaShahid004/Kanban-Website/pulls"><img src="https://img.shields.io/github/pulls/TalhaShahid004/Kanban-Website" alt="Pull Requests"></a>
-  <a href="https://github.com/TalhaShahid004/Kanban-Website/blob/main/LICENSE"><img src="https://img.shields.io/github/license/TalhaShahid004/Kanban-Website" alt="License"></a>
 </div>
 
 <br/>
